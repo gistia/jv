@@ -44,11 +44,12 @@ type Line struct {
 }
 
 func (line *Line) String() string {
+	spaces := PadRight("", " ", 2)
 	str := " "
 	str += PadRight(line.entry.timestamp, " ", 24)
-	str += " "
+	str += spaces
 	str += PadRight(line.entry.level, " ", 5)
-	str += " "
+	str += spaces
 	str += line.entry.message
 	return str
 }
