@@ -354,6 +354,16 @@ func (v *View) SetLine(y int) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	switch e := event.(type) {
+	case *tcell.EventKey:
+		if e.Key() == tcell.KeyCtrlQ {
+			Quit([]string{""})
+		}
+		if e.Key() == tcell.KeyUp {
+			Log.Println("Up")
+		}
+	}
+
 	// // This bool determines whether the view is relocated at the end of the function
 	// // By default it's true because most events should cause a relocate
 	// relocate := true

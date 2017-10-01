@@ -19,16 +19,86 @@ var (
 	// The default highlighting style
 	// This simply defines the default foreground and background colors
 	defStyle tcell.Style
-	events   chan tcell.Event
+
+	// Channel of jobs running in the background
+	jobs chan JobFunction
+	// Event channel
+	events chan tcell.Event
 )
 
 func main() {
+	logfile := os.Args[2]
+	NewLog(logfile)
+	Log.Println("Started - log", logfile)
+
 	InitScreen()
+	Log.Println("InitScreen done")
 	buffer := LoadInput()
+	Log.Println("LoadInput done")
+
+	jobs = make(chan JobFunction, 100)
+	events = make(chan tcell.Event, 100)
+
+	// Create a new messenger
+	// This is used for sending the user messages in the bottom of the editor
+	messenger = new(Messenger)
+	messenger.history = make(map[string][]string)
+	Log.Println("Messenger done")
 
 	view = NewView(buffer)
+	Log.Println("NewView done")
 
-	RedrawAll()
+	go func() {
+		for {
+			Log.Println("Event1 - screen", screen == nil)
+			if screen != nil {
+				events <- screen.PollEvent()
+			}
+		}
+	}()
+
+	for {
+		Log.Println("before RedrawAll")
+		RedrawAll()
+		Log.Println("after RedrawAll")
+		var event tcell.Event
+
+		// Check for new events
+		select {
+		case f := <-jobs:
+			// If a new job has finished while running in the background we should execute the callback
+			f.function(f.output, f.args...)
+			continue
+		// case <-autosave:
+		// 	CurView().Save(true)
+		case event = <-events:
+		}
+
+		for event != nil {
+			Log.Println("event", event)
+
+			switch event.(type) {
+			case *tcell.EventResize:
+				// view.Resize()
+			}
+
+			if searching {
+				// Since searching is done in real time, we need to redraw every time
+				// there is a new event in the search bar so we need a special function
+				// to run instead of the standard HandleEvent.
+				HandleSearchEvent(event, CurView())
+			} else {
+				// Send it to the view
+				CurView().HandleEvent(event)
+			}
+
+			select {
+			case event = <-events:
+			default:
+				event = nil
+			}
+		}
+	}
 }
 
 func LoadInput() *Buffer {
@@ -100,8 +170,12 @@ func RedrawAll() {
 	}
 
 	view.Display()
-	// messenger.Display()
+	messenger.Display()
 	screen.Show()
+}
+
+func CurView() *View {
+	return view
 }
 
 // logfile := "/Users/fcoury/logs/jvg.log"
