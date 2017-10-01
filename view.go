@@ -362,10 +362,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			Quit([]string{""})
 		}
 		if e.Key() == tcell.KeyDown {
-			v.Line += 1
+			v.Down()
 		}
 		if e.Key() == tcell.KeyUp {
-			v.Line -= 1
+			v.Up()
 		}
 	}
 
