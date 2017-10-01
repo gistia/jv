@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/zyedidia/tcell"
@@ -553,7 +554,7 @@ func (v *View) DisplayView() {
 
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
-	// maxLineNumLength := len(strconv.Itoa(v.Buf.NumLines))
+	maxLineNumLength := len(strconv.Itoa(v.Buf.NumLines))
 
 	// if v.Buf.Settings["ruler"] == true {
 	// 	// + 1 for the little space after the line number
@@ -590,18 +591,51 @@ func (v *View) DisplayView() {
 
 	v.cellview.Draw(v.Buf, top, height, left, width-v.lineNumOffset)
 
-	// screenX := v.x
-	// realLineN := top - 1
+	displayLineNumber := true
+	lineNumberPadding := 1
+	realLineN := top - 1
 	visualLineN := 0
 	var line []*Char
 	for visualLineN, line = range v.cellview.lines {
-		for x, ch := range line {
-			lineStyle := defStyle
-			if v.Line == visualLineN {
-				lineStyle = defStyle.Reverse(true)
+		screenX := 0
+		if displayLineNumber {
+			lineNumStyle := defStyle
+			lineNum := strconv.Itoa(realLineN + 1)
+
+			// padding before
+			for i := 0; i < lineNumberPadding; i++ {
+				screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+				screenX++
 			}
-			screen.SetContent(x, visualLineN, ch.drawChar, nil, lineStyle)
+			for i := 0; i < maxLineNumLength-len(lineNum); i++ {
+				screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+				screenX++
+			}
+
+			for x, ch := range lineNum {
+				screen.SetContent(screenX+x, visualLineN, ch, nil, lineNumStyle)
+				screenX++
+			}
+
+			// padding after
+			for i := 0; i < lineNumberPadding; i++ {
+				screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+				screenX++
+			}
 		}
+		lineStyle := defStyle
+		if v.Line == visualLineN {
+			lineStyle = defStyle.Reverse(true)
+		}
+		for _, ch := range line {
+			screen.SetContent(screenX, visualLineN, ch.drawChar, nil, lineStyle)
+			screenX++
+		}
+		for screenX < width {
+			screen.SetContent(screenX, visualLineN, ' ', nil, lineStyle)
+			screenX++
+		}
+		realLineN++
 	}
 	// 	var firstChar *Char
 	// 	if len(line) > 0 {
