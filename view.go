@@ -154,10 +154,14 @@ func (v *View) ScrollUp(n int) {
 
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
+	Log.Println("ScrollDown", n)
 	// Try to scroll by n but if it would overflow, scroll by 1
+	Log.Println("ScrollDown", v.Topline+n <= v.Buf.NumLines)
 	if v.Topline+n <= v.Buf.NumLines {
+		Log.Println("TopLine", n)
 		v.Topline += n
 	} else if v.Topline < v.Buf.NumLines-1 {
+		Log.Println("TopLine++")
 		v.Topline++
 	}
 }
@@ -291,9 +295,9 @@ func (v *View) Bottomline() int {
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	height := v.Bottomline() - v.Topline
+	Log.Println("height", height)
 	ret := false
 	cy := v.Line
-	// scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
 	scrollmargin := 0
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
 		v.Topline = cy - scrollmargin
@@ -310,42 +314,7 @@ func (v *View) Relocate() bool {
 		ret = true
 	}
 
-	// if !v.Buf.Settings["softwrap"].(bool) {
-	// 	cx := v.Cursor.GetVisualX()
-	// 	if cx < v.leftCol {
-	// 		v.leftCol = cx
-	// 		ret = true
-	// 	}
-	// 	if cx+v.lineNumOffset+1 > v.leftCol+v.Width {
-	// 		v.leftCol = cx - v.Width + v.lineNumOffset + 1
-	// 		ret = true
-	// 	}
-	// }
 	return ret
-}
-
-// MoveToMouseClick moves the cursor to location x, y assuming x, y were given
-// by a mouse click
-func (v *View) MoveToMouseClick(x, y int) {
-	// if y-v.Topline > v.Height-1 {
-	// 	v.ScrollDown(1)
-	// 	y = v.Height + v.Topline - 1
-	// }
-	// if y < 0 {
-	// 	y = 0
-	// }
-	// if x < 0 {
-	// 	x = 0
-	// }
-
-	// x, y = v.GetSoftWrapLocation(x, y)
-	// // x = v.Cursor.GetCharPosInLine(y, x)
-	// if x > Count(v.Buf.Line(y)) {
-	// 	x = Count(v.Buf.Line(y))
-	// }
-	// v.Cursor.X = x
-	// v.Cursor.Y = y
-	// v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
 func (v *View) SetLine(y int) bool {
@@ -367,144 +336,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 		if e.Key() == tcell.KeyUp {
 			v.Up()
 		}
+		if e.Key() == tcell.KeyPgDn {
+			Log.Println("PageDown")
+			v.PageDown()
+		}
 	}
 
-	// // This bool determines whether the view is relocated at the end of the function
-	// // By default it's true because most events should cause a relocate
-	// relocate := true
-
-	// switch e := event.(type) {
-	// case *tcell.EventKey:
-	// 	// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
-	// 	isBinding := false
-	// 	for key, actions := range bindings {
-	// 		if e.Key() == key.keyCode {
-	// 			if e.Key() == tcell.KeyRune {
-	// 				if e.Rune() != key.r {
-	// 					continue
-	// 				}
-	// 			}
-	// 			if e.Modifiers() == key.modifiers {
-	// 				for _, c := range v.Buf.cursors {
-	// 					ok := v.SetCursor(c)
-	// 					if !ok {
-	// 						break
-	// 					}
-	// 					relocate = false
-	// 					isBinding = true
-	// 					relocate = v.ExecuteActions(actions) || relocate
-	// 				}
-	// 				v.SetCursor(&v.Buf.Cursor)
-	// 				v.Buf.MergeCursors()
-	// 				break
-	// 			}
-	// 		}
-	// 	}
-	// 	if !isBinding && e.Key() == tcell.KeyRune {
-	// 		// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
-	// 		if v.Type.readonly == false {
-	// 			for _, c := range v.Buf.cursors {
-	// 				v.SetCursor(c)
-
-	// 				// Insert a character
-	// 				if v.Cursor.HasSelection() {
-	// 					v.Cursor.DeleteSelection()
-	// 					v.Cursor.ResetSelection()
-	// 				}
-	// 				v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-
-	// 				for pl := range loadedPlugins {
-	// 					_, err := Call(pl+".onRune", string(e.Rune()), v)
-	// 					if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-	// 						TermMessage(err)
-	// 					}
-	// 				}
-
-	// 				if recordingMacro {
-	// 					curMacro = append(curMacro, e.Rune())
-	// 				}
-	// 			}
-	// 			v.SetCursor(&v.Buf.Cursor)
-	// 		}
-	// 	}
-	// case *tcell.EventPaste:
-	// 	// Check viewtype if readonly don't paste (readonly help and log view etc.)
-	// 	if v.Type.readonly == false {
-	// 		if !PreActionCall("Paste", v) {
-	// 			break
-	// 		}
-
-	// 		for _, c := range v.Buf.cursors {
-	// 			v.SetCursor(c)
-	// 			v.paste(e.Text())
-	// 		}
-	// 		v.SetCursor(&v.Buf.Cursor)
-
-	// 		PostActionCall("Paste", v)
-	// 	}
-	// case *tcell.EventMouse:
-	// 	// Don't relocate for mouse events
-	// 	relocate = false
-
-	// 	button := e.Buttons()
-
-	// 	for key, actions := range bindings {
-	// 		if button == key.buttons && e.Modifiers() == key.modifiers {
-	// 			for _, c := range v.Buf.cursors {
-	// 				ok := v.SetCursor(c)
-	// 				if !ok {
-	// 					break
-	// 				}
-	// 				relocate = v.ExecuteActions(actions) || relocate
-	// 			}
-	// 			v.SetCursor(&v.Buf.Cursor)
-	// 			v.Buf.MergeCursors()
-	// 		}
-	// 	}
-
-	// 	for key, actions := range mouseBindings {
-	// 		if button == key.buttons && e.Modifiers() == key.modifiers {
-	// 			for _, action := range actions {
-	// 				action(v, true, e)
-	// 			}
-	// 		}
-	// 	}
-
-	// 	switch button {
-	// 	case tcell.ButtonNone:
-	// 		// Mouse event with no click
-	// 		if !v.mouseReleased {
-	// 			// Mouse was just released
-
-	// 			x, y := e.Position()
-	// 			x -= v.lineNumOffset - v.leftCol + v.x
-	// 			y += v.Topline - v.y
-
-	// 			// Relocating here isn't really necessary because the cursor will
-	// 			// be in the right place from the last mouse event
-	// 			// However, if we are running in a terminal that doesn't support mouse motion
-	// 			// events, this still allows the user to make selections, except only after they
-	// 			// release the mouse
-
-	// 			if !v.doubleClick && !v.tripleClick {
-	// 				v.MoveToMouseClick(x, y)
-	// 				v.Cursor.SetSelectionEnd(v.Cursor.Loc)
-	// 				v.Cursor.CopySelection("primary")
-	// 			}
-	// 			v.mouseReleased = true
-	// 		}
-	// 	}
-	// }
-
-	// if relocate {
-	// 	v.Relocate()
-	// 	// We run relocate again because there's a bug with relocating with softwrap
-	// 	// when for example you jump to the bottom of the buffer and it tries to
-	// 	// calculate where to put the topline so that the bottom line is at the bottom
-	// 	// of the terminal and it runs into problems with visual lines vs real lines.
-	// 	// This is (hopefully) a temporary solution
-	// 	v.Relocate()
-	// }
+	v.Relocate()
 }
 
 // GutterMessage creates a message in this view's gutter
@@ -593,7 +431,8 @@ func (v *View) DisplayView() {
 
 	displayLineNumber := true
 	lineNumberPadding := 1
-	realLineN := top - 1
+	Log.Println("top", top)
+	realLineN := top
 	visualLineN := 0
 	var line []*Char
 	for visualLineN, line = range v.cellview.lines {

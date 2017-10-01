@@ -34,3 +34,14 @@ func (v *View) Down() {
 func (v *View) Up() {
 	v.UpN(-1)
 }
+
+// PageDown scrolls the view down a page
+func (v *View) PageDown() {
+	Log.Println("PageDown", v.Buf.NumLines-(v.Topline+v.Height), v.Height)
+	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height {
+		v.ScrollDown(v.Height)
+	} else if v.Buf.NumLines >= v.Height {
+		Log.Println("TopLine", v.Buf.NumLines-v.Height)
+		v.Topline = v.Buf.NumLines - v.Height
+	}
+}
