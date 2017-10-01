@@ -50,7 +50,6 @@ func main() {
 
 	go func() {
 		for {
-			Log.Println("Event1 - screen", screen == nil)
 			if screen != nil {
 				events <- screen.PollEvent()
 			}
