@@ -29,7 +29,8 @@ func runeToByteIndex(n int, txt []byte) int {
 	return count
 }
 
-type Entry struct {
+// LogEntry is a parsed raw line
+type LogEntry struct {
 	timestamp string
 	level     string
 	message   string
@@ -39,7 +40,17 @@ type Entry struct {
 // Line is a raw line
 type Line struct {
 	data  []byte
-	entry Entry
+	entry LogEntry
+}
+
+func (line *Line) String() string {
+	str := " "
+	str += PadRight(line.entry.timestamp, " ", 24)
+	str += " "
+	str += PadRight(line.entry.level, " ", 5)
+	str += " "
+	str += line.entry.message
+	return str
 }
 
 func NewLine(data []byte) Line {
@@ -48,7 +59,7 @@ func NewLine(data []byte) Line {
 	parsedLine, err := gabs.ParseJSON(data)
 
 	if err != nil {
-		entry := Entry{"", "", "", nil}
+		entry := LogEntry{"", "", "", nil}
 		return Line{data, entry}
 	}
 
@@ -56,8 +67,7 @@ func NewLine(data []byte) Line {
 	level := parsedLine.Path("level").Data().(string)
 	message := parsedLine.Path("message").Data().(string)
 	entryData := parsedLine.Data().(map[string]interface{})
-	entry := Entry{timestamp, level, message, entryData}
-	Log.Println("entry", entry)
+	entry := LogEntry{timestamp, level, message, entryData}
 	return Line{data, entry}
 }
 

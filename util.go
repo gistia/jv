@@ -379,3 +379,21 @@ func ReplaceHome(path string) string {
 	}
 	return strings.Replace(path, "~", home, 1)
 }
+
+func PadRight(str, pad string, lenght int) string {
+	for {
+		str += pad
+		if len(str) > lenght {
+			return str[0:lenght]
+		}
+	}
+}
+
+func PadLeft(str, pad string, lenght int) string {
+	for {
+		str = pad + str
+		if len(str) > lenght {
+			return str[0:lenght]
+		}
+	}
+}

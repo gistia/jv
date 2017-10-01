@@ -112,7 +112,7 @@ func (b *Buffer) Line(n int) string {
 	if n >= len(b.lines) {
 		return ""
 	}
-	return string(b.lines[n].data)
+	return b.lines[n].String()
 }
 
 // LinesNum returns the number of lines
