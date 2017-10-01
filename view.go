@@ -612,8 +612,8 @@ func (v *View) DisplayView() {
 				screenX++
 			}
 
-			for x, ch := range lineNum {
-				screen.SetContent(screenX+x, visualLineN, ch, nil, lineNumStyle)
+			for _, ch := range lineNum {
+				screen.SetContent(screenX, visualLineN, ch, nil, lineNumStyle)
 				screenX++
 			}
 
