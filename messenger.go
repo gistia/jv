@@ -71,11 +71,9 @@ type Messenger struct {
 
 // AddLog sends a message to the log view
 func (m *Messenger) AddLog(msg ...interface{}) {
-	logMessage := fmt.Sprint(msg...)
-	buffer := m.getBuffer()
-	buffer.insert(buffer.End(), []byte(logMessage+"\n"))
-	// buffer.Cursor.Loc = buffer.End()
-	// buffer.Cursor.Relocate()
+	// logMessage := fmt.Sprint(msg...)
+	// buffer := m.getBuffer()
+	// buffer.insert(buffer.End(), []byte(logMessage+"\n"))
 }
 
 func (m *Messenger) getBuffer() *Buffer {

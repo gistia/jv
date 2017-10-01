@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"io"
 	"unicode/utf8"
+
+	"github.com/Jeffail/gabs"
 )
 
 func runeToByteIndex(n int, txt []byte) int {
@@ -27,10 +29,36 @@ func runeToByteIndex(n int, txt []byte) int {
 	return count
 }
 
+type Entry struct {
+	timestamp string
+	level     string
+	message   string
+	data      map[string]interface{}
+}
+
 // Line is a raw line
 type Line struct {
-	data []byte
-	json map[string]interface{}
+	data  []byte
+	entry Entry
+}
+
+func NewLine(data []byte) Line {
+	// data := []byte(rawLine)
+	// ignore errors
+	parsedLine, err := gabs.ParseJSON(data)
+
+	if err != nil {
+		entry := Entry{"", "", "", nil}
+		return Line{data, entry}
+	}
+
+	timestamp := parsedLine.Path("timestamp").Data().(string)
+	level := parsedLine.Path("level").Data().(string)
+	message := parsedLine.Path("message").Data().(string)
+	entryData := parsedLine.Data().(map[string]interface{})
+	entry := Entry{timestamp, level, message, entryData}
+	Log.Println("entry", entry)
+	return Line{data, entry}
 }
 
 // A LineArray simply stores and array of lines and makes it easy to insert
@@ -94,13 +122,13 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 		if err != nil {
 			if err == io.EOF {
 				// la.lines = Append(la.lines, Line{data[:], nil, nil, false})
-				la.lines = Append(la.lines, Line{data[:len(data)], nil})
+				la.lines = Append(la.lines, NewLine(data[:]))
 			}
 			// Last line was read
 			break
 		} else {
-			la.lines = Append(la.lines, Line{data[:len(data)-1], nil})
 			// la.lines = Append(la.lines, Line{data[:len(data)-1], nil, nil, false})
+			la.lines = Append(la.lines, NewLine(data[:len(data)-1]))
 		}
 		n++
 	}
@@ -137,65 +165,11 @@ func (la *LineArray) SaveString(useCrlf bool) string {
 	return str
 }
 
-// NewlineBelow adds a newline below the given line number
-func (la *LineArray) NewlineBelow(y int) {
-	la.lines = append(la.lines, Line{[]byte(" "), nil})
-	copy(la.lines[y+2:], la.lines[y+1:])
-	la.lines[y+1] = Line{[]byte(""), nil}
-}
-
-// inserts a byte array at a given location
-func (la *LineArray) insert(pos Loc, value []byte) {
-	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
-	// x, y := pos.x, pos.y
-	for i := 0; i < len(value); i++ {
-		if value[i] == '\n' {
-			la.Split(Loc{x, y})
-			x = 0
-			y++
-			continue
-		}
-		la.insertByte(Loc{x, y}, value[i])
-		x++
-	}
-}
-
 // inserts a byte at a given location
 func (la *LineArray) insertByte(pos Loc, value byte) {
 	la.lines[pos.Y].data = append(la.lines[pos.Y].data, 0)
 	copy(la.lines[pos.Y].data[pos.X+1:], la.lines[pos.Y].data[pos.X:])
 	la.lines[pos.Y].data[pos.X] = value
-}
-
-// JoinLines joins the two lines a and b
-func (la *LineArray) JoinLines(a, b int) {
-	la.insert(Loc{len(la.lines[a].data), a}, la.lines[b].data)
-	la.DeleteLine(b)
-}
-
-// Split splits a line at a given position
-func (la *LineArray) Split(pos Loc) {
-	la.NewlineBelow(pos.Y)
-	la.insert(Loc{0, pos.Y + 1}, la.lines[pos.Y].data[pos.X:])
-	la.DeleteToEnd(Loc{pos.X, pos.Y})
-}
-
-// removes from start to end
-func (la *LineArray) remove(start, end Loc) string {
-	sub := la.Substr(start, end)
-	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
-	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
-	if start.Y == end.Y {
-		la.lines[start.Y].data = append(la.lines[start.Y].data[:startX], la.lines[start.Y].data[endX:]...)
-	} else {
-		for i := start.Y + 1; i <= end.Y-1; i++ {
-			la.DeleteLine(start.Y + 1)
-		}
-		la.DeleteToEnd(Loc{startX, start.Y})
-		la.DeleteFromStart(Loc{endX - 1, start.Y + 1})
-		la.JoinLines(start.Y, start.Y+1)
-	}
-	return sub
 }
 
 // DeleteToEnd deletes from the end of a line to the position
@@ -232,8 +206,4 @@ func (la *LineArray) Substr(start, end Loc) string {
 	}
 	str += string(la.lines[end.Y].data[:endX])
 	return str
-}
-
-func (la *LineArray) SetJSON(lineN int, json map[string]interface{}) {
-	la.lines[lineN].json = json
 }

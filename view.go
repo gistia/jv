@@ -556,33 +556,7 @@ func (v *View) DisplayView() {
 	// so we can pad appropriately when displaying line numbers
 	maxLineNumLength := len(strconv.Itoa(v.Buf.NumLines))
 
-	// if v.Buf.Settings["ruler"] == true {
-	// 	// + 1 for the little space after the line number
-	// 	v.lineNumOffset = maxLineNumLength + 1
-	// } else {
 	v.lineNumOffset = 0
-	// }
-
-	// We need to add to the line offset if there are gutter messages
-	var hasGutterMessages bool
-	for _, v := range v.messages {
-		if len(v) > 0 {
-			hasGutterMessages = true
-		}
-	}
-	if hasGutterMessages {
-		v.lineNumOffset += 2
-	}
-
-	// divider := 0
-	// if v.x != 0 {
-	// 	// One space for the extra split divider
-	// 	v.lineNumOffset++
-	// 	divider = 1
-	// }
-
-	// xOffset := v.x + v.lineNumOffset
-	// yOffset := v.y
 
 	height := v.Height
 	width := v.Width
@@ -593,7 +567,7 @@ func (v *View) DisplayView() {
 
 	displayLineNumber := true
 	lineNumberPadding := 1
-	realLineN := top - 1
+	realLineN := top
 	visualLineN := 0
 	var line []*Char
 	for visualLineN, line = range v.cellview.lines {
@@ -628,7 +602,8 @@ func (v *View) DisplayView() {
 			lineStyle = defStyle.Reverse(true)
 		}
 		for _, ch := range line {
-			screen.SetContent(screenX, visualLineN, ch.drawChar, nil, lineStyle)
+			charStyle := lineStyle
+			screen.SetContent(screenX, visualLineN, ch.drawChar, nil, charStyle)
 			screenX++
 		}
 		for screenX < width {
@@ -642,7 +617,7 @@ func (v *View) DisplayView() {
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	// if globalSettings["termtitle"].(bool) {
-	// 	screen.SetTitle("micro: " + v.Buf.GetName())
+	screen.SetTitle("micro: " + v.Buf.GetName())
 	// }
 	v.DisplayView()
 	// _, screenH := screen.Size()
