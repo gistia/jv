@@ -26,11 +26,9 @@ func main() {
 	InitScreen()
 	buffer := LoadInput()
 
-	// tab := NewTabFromView(NewView(buf))
-	// tab.SetNum(len(tabs))
-
 	view = NewView(buffer)
-	// view.Center(false)
+
+	RedrawAll()
 }
 
 func LoadInput() *Buffer {
@@ -102,7 +100,7 @@ func RedrawAll() {
 	}
 
 	view.Display()
-	messenger.Display()
+	// messenger.Display()
 	screen.Show()
 }
 

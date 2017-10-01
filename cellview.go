@@ -60,9 +60,10 @@ type CellView struct {
 }
 
 func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
-	tabsize := int(buf.Settings["tabsize"].(float64))
-	softwrap := buf.Settings["softwrap"].(bool)
-	indentrunes := []rune(buf.Settings["indentchar"].(string))
+	tabsize := 0      // int(buf.Settings["tabsize"].(float64))
+	softwrap := false // buf.Settings["softwrap"].(bool)
+	// indentrunes := []rune(buf.Settings["indentchar"].(string))
+	indentrunes := []rune(" ")
 	// if empty indentchar settings, use space
 	if indentrunes == nil || len(indentrunes) == 0 {
 		indentrunes = []rune(" ")

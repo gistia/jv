@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/zyedidia/tcell"
@@ -529,9 +528,9 @@ func (v *View) openHelp(helpPage string) {
 }
 
 func (v *View) DisplayView() {
-	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
-		v.leftCol = 0
-	}
+	// if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
+	// 	v.leftCol = 0
+	// }
 
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
@@ -540,14 +539,14 @@ func (v *View) DisplayView() {
 
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
-	maxLineNumLength := len(strconv.Itoa(v.Buf.NumLines))
+	// maxLineNumLength := len(strconv.Itoa(v.Buf.NumLines))
 
-	if v.Buf.Settings["ruler"] == true {
-		// + 1 for the little space after the line number
-		v.lineNumOffset = maxLineNumLength + 1
-	} else {
-		v.lineNumOffset = 0
-	}
+	// if v.Buf.Settings["ruler"] == true {
+	// 	// + 1 for the little space after the line number
+	// 	v.lineNumOffset = maxLineNumLength + 1
+	// } else {
+	v.lineNumOffset = 0
+	// }
 
 	// We need to add to the line offset if there are gutter messages
 	var hasGutterMessages bool
@@ -830,12 +829,12 @@ func (v *View) Display() {
 	// 	screen.SetTitle("micro: " + v.Buf.GetName())
 	// }
 	v.DisplayView()
-	_, screenH := screen.Size()
-	if v.Buf.Settings["statusline"].(bool) {
-		// v.sline.Display()
-	} else if (v.y + v.Height) != screenH-1 {
-		for x := 0; x < v.Width; x++ {
-			screen.SetContent(v.x+x, v.y+v.Height, '-', nil, defStyle.Reverse(true))
-		}
+	// _, screenH := screen.Size()
+	// if v.Buf.Settings["statusline"].(bool) {
+	// v.sline.Display()
+	// } else if (v.y + v.Height) != screenH-1 {
+	for x := 0; x < v.Width; x++ {
+		screen.SetContent(v.x+x, v.y+v.Height, '-', nil, defStyle.Reverse(true))
 	}
+	// }
 }
