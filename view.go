@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/zyedidia/tcell"
@@ -301,27 +302,54 @@ func (v *View) SetLine(y int) bool {
 	return true
 }
 
+// Execute actions executes the supplied actions
+func (v *View) ExecuteActions(actions []func(*View) bool) bool {
+	relocate := false
+	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
+	for _, action := range actions {
+		readonlyBindingsResult := false
+		funcName := ShortFuncName(action)
+		if v.Type.readonly == true {
+			// check for readonly and if true only let key bindings get called if they do not change the contents.
+			for _, readonlyBindings := range readonlyBindingsList {
+				if strings.Contains(funcName, readonlyBindings) {
+					readonlyBindingsResult = true
+				}
+			}
+		}
+		if !readonlyBindingsResult {
+			// call the key binding
+			relocate = action(v) || relocate
+		}
+	}
+
+	return relocate
+}
+
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	relocate := true
 
 	switch e := event.(type) {
 	case *tcell.EventKey:
-		Log.Println("key", e.Key())
-		if e.Key() == 256 || e.Key() == tcell.KeyCtrlC {
-			relocate = Quit([]string{""})
-		}
-		if e.Key() == tcell.KeyDown {
-			relocate = v.Down()
-		}
-		if e.Key() == tcell.KeyUp {
-			relocate = v.Up()
-		}
-		if e.Key() == tcell.KeyPgDn {
-			relocate = v.PageDown()
-		}
-		if e.Key() == tcell.KeyPgUp {
-			relocate = v.PageUp()
+		Log.Println("bindings", bindings)
+		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
+		for key, actions := range bindings {
+			Log.Println("key", key)
+			Log.Println("actions", actions)
+			if e.Key() == key.keyCode {
+				if e.Key() == tcell.KeyRune {
+					Log.Println("Is Rune", key.r)
+					if e.Rune() != key.r {
+						continue
+					}
+				}
+				if e.Modifiers() == key.modifiers {
+					relocate = false
+					relocate = v.ExecuteActions(actions) || relocate
+					break
+				}
+			}
 		}
 	}
 

@@ -31,6 +31,8 @@ func main() {
 	NewLog(logfile)
 	Log.Println("Started - log", logfile)
 
+	InitBindings()
+
 	InitScreen()
 	Log.Println("InitScreen done")
 	buffer := LoadInput()
