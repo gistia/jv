@@ -61,7 +61,7 @@ type View struct {
 	// The buffer
 	Buf *Buffer
 	// The statusline
-	// sline Statusline
+	sline Statusline
 
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
@@ -114,21 +114,24 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.messages = make(map[string][]GutterMessage)
 
-	// v.sline = Statusline{
-	// 	view: v,
-	// }
+	v.sline = Statusline{
+		view: v,
+	}
 
 	// if v.Buf.Settings["statusline"].(bool) {
 	if true {
-		v.Height--
+		v.Height -= 2
 	}
+
+	Log.Println("Height", v.Height)
 
 	return v
 }
 
 // ToggleStatusLine creates an extra row for the statusline if necessary
 func (v *View) ToggleStatusLine() {
-	if v.Buf.Settings["statusline"].(bool) {
+	// if v.Buf.Settings["statusline"].(bool) {
+	if true {
 		v.Height--
 	} else {
 		v.Height++
@@ -462,10 +465,10 @@ func (v *View) Display() {
 	v.DisplayView()
 	// _, screenH := screen.Size()
 	// if v.Buf.Settings["statusline"].(bool) {
-	// v.sline.Display()
+	v.sline.Display()
 	// } else if (v.y + v.Height) != screenH-1 {
-	for x := 0; x < v.Width; x++ {
-		screen.SetContent(v.x+x, v.y+v.Height, '-', nil, defStyle.Reverse(true))
-	}
+	// for x := 0; x < v.Width; x++ {
+	// 	screen.SetContent(v.x+x, v.y+v.Height, '-', nil, defStyle.Reverse(true))
+	// }
 	// }
 }

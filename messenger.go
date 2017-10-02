@@ -375,19 +375,21 @@ func (m *Messenger) Display() {
 	_, h := screen.Size()
 	if m.hasMessage {
 		// if m.hasPrompt || globalSettings["infobar"].(bool) {
-		if m.hasPrompt {
-			runes := []rune(m.message + m.response)
-			posx := 0
-			for x := 0; x < len(runes); x++ {
-				screen.SetContent(posx, h-1, runes[x], nil, m.style)
-				posx += runewidth.RuneWidth(runes[x])
-			}
+		runes := []rune(m.message + m.response)
+		posx := 0
+		for x := 0; x < len(runes); x++ {
+			screen.SetContent(posx, h-1, runes[x], nil, m.style)
+			posx += runewidth.RuneWidth(runes[x])
 		}
+		// if m.hasPrompt {
+		// }
 	}
 
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()
+	} else {
+		screen.HideCursor()
 	}
 }
 

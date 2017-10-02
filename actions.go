@@ -63,6 +63,7 @@ func (v *View) FindNext() bool {
 	if lastSearch == "" {
 		return true
 	}
+	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
 	return true
 }
@@ -70,6 +71,13 @@ func (v *View) FindNext() bool {
 // FindPrevious searches backwards for the last used search term
 func (v *View) FindPrevious() bool {
 	searchStart = v.Line
+	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
 	return true
+}
+
+// ClearStatus clears the messenger bar
+func (v *View) ClearStatus() bool {
+	messenger.Message("")
+	return false
 }

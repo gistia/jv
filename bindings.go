@@ -18,6 +18,7 @@ var bindingActions = map[string]func(*View) bool{
 	"Find":         (*View).Find,
 	"FindNext":     (*View).FindNext,
 	"FindPrevious": (*View).FindPrevious,
+	"ClearStatus":  (*View).ClearStatus,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -316,5 +317,6 @@ func DefaultBindings() map[string]string {
 		"/":        "Find",
 		"n":        "FindNext",
 		"N":        "FindPrevious",
+		"Escape":   "ClearStatus",
 	}
 }

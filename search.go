@@ -39,7 +39,7 @@ func EndSearch() {
 	messenger.Clear()
 	messenger.Reset()
 	if lastSearch != "" {
-		messenger.Message("^P Previous ^N Next")
+		messenger.Message("N Previous n Next")
 	}
 }
 
