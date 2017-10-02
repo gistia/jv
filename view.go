@@ -419,7 +419,7 @@ func (v *View) DisplayView() {
 			}
 		}
 		lineStyle := defStyle
-		if v.Line == visualLineN {
+		if v.Line == realLineN {
 			lineStyle = defStyle.Reverse(true)
 		}
 		for _, ch := range line {
