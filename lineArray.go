@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"io"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/Jeffail/gabs"
@@ -44,13 +45,14 @@ type Line struct {
 }
 
 func (line *Line) String() string {
+	firstLine := strings.Split(line.entry.message, "\n")[0]
 	spaces := PadRight("", " ", 2)
 	str := " "
 	str += PadRight(line.entry.timestamp, " ", 24)
 	str += spaces
 	str += PadRight(line.entry.level, " ", 5)
 	str += spaces
-	str += line.entry.message
+	str += strings.TrimSpace(firstLine)
 	return str
 }
 
