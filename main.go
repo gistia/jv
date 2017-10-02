@@ -34,9 +34,7 @@ func main() {
 	InitBindings()
 
 	InitScreen()
-	Log.Println("InitScreen done")
 	buffer := LoadInput()
-	Log.Println("LoadInput done")
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
@@ -45,10 +43,8 @@ func main() {
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
-	Log.Println("Messenger done")
 
 	view = NewView(buffer)
-	Log.Println("NewView done")
 
 	go func() {
 		for {
@@ -59,9 +55,7 @@ func main() {
 	}()
 
 	for {
-		Log.Println("before RedrawAll")
 		RedrawAll()
-		Log.Println("after RedrawAll")
 		var event tcell.Event
 
 		// Check for new events
@@ -76,8 +70,6 @@ func main() {
 		}
 
 		for event != nil {
-			Log.Println("event", event)
-
 			switch event.(type) {
 			case *tcell.EventResize:
 				// view.Resize()

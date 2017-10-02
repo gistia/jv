@@ -10,12 +10,14 @@ var bindings map[Key][]func(*View) bool
 var helpBinding string
 
 var bindingActions = map[string]func(*View) bool{
-	"Up":       (*View).Up,
-	"Down":     (*View).Down,
-	"PageUp":   (*View).PageUp,
-	"PageDown": (*View).PageDown,
-	"Quit":     (*View).Quit,
-	"Find":     (*View).Find,
+	"Up":           (*View).Up,
+	"Down":         (*View).Down,
+	"PageUp":       (*View).PageUp,
+	"PageDown":     (*View).PageDown,
+	"Quit":         (*View).Quit,
+	"Find":         (*View).Find,
+	"FindNext":     (*View).FindNext,
+	"FindPrevious": (*View).FindPrevious,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -270,11 +272,9 @@ func findAction(v string) (action func(*View) bool) {
 
 // BindKey takes a key and an action and binds the two together
 func BindKey(k, v string) {
-	Log.Println("Bind:", k, v)
 	key, ok := findKey(k)
 	if !ok {
 		TermMessage("Unknown keybinding: " + k)
-		Log.Println("Unknown keybinding", k)
 		return
 	}
 	if v == "ToggleHelp" {
@@ -298,7 +298,6 @@ func BindKey(k, v string) {
 	}
 
 	if len(actions) > 0 {
-		Log.Println("Binding final", key, actions)
 		bindings[key] = actions
 	}
 }
@@ -315,5 +314,7 @@ func DefaultBindings() map[string]string {
 		"Q":        "Quit",
 		"q":        "Quit",
 		"/":        "Find",
+		"n":        "FindNext",
+		"N":        "FindPrevious",
 	}
 }

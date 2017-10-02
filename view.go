@@ -155,14 +155,10 @@ func (v *View) ScrollUp(n int) {
 
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
-	Log.Println("ScrollDown", n)
 	// Try to scroll by n but if it would overflow, scroll by 1
-	Log.Println("ScrollDown", v.Topline+n <= v.Buf.NumLines)
 	if v.Topline+n <= v.Buf.NumLines {
-		Log.Println("TopLine", n)
 		v.Topline += n
 	} else if v.Topline < v.Buf.NumLines-1 {
-		Log.Println("TopLine++")
 		v.Topline++
 	}
 }
@@ -183,7 +179,6 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.Line = buf.Y
 	v.Topline = 0
 	v.leftCol = 0
-	Log.Println("Relocate from OpenBuffer")
 	v.Relocate()
 	v.messages = make(map[string][]GutterMessage)
 
@@ -226,7 +221,6 @@ func (v *View) ReOpen() {
 	if v.CanClose() {
 		screen.Clear()
 		// v.Buf.ReOpen()
-		Log.Println("Relocate from ReOpen")
 		v.Relocate()
 	}
 }
@@ -267,29 +261,20 @@ func (v *View) Bottomline() int {
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	height := v.Bottomline() - v.Topline
-	Log.Println("Relocate - height", height)
 	ret := false
 	cy := v.Line
 	scrollmargin := 3
-	Log.Println("cy", cy)
-	Log.Println("v.Topline", v.Topline)
-	Log.Println("v.Topline+scrollmargin", v.Topline+scrollmargin)
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
-		Log.Println("realc topline")
 		v.Topline = cy - scrollmargin
 		ret = true
 	} else if cy < v.Topline {
-		Log.Println("topline y")
 		v.Topline = cy
 		ret = true
 	}
 	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
-		Log.Println("recalc topline 2")
 		v.Topline = cy - height + 1 + scrollmargin
-		Log.Println("recalc new Topline", v.Topline)
 		ret = true
 	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
-		Log.Println("set topline 2")
 		v.Topline = v.Buf.NumLines - height
 		ret = true
 	}
@@ -332,14 +317,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 	switch e := event.(type) {
 	case *tcell.EventKey:
-		Log.Println("bindings", bindings)
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		for key, actions := range bindings {
-			Log.Println("key", key)
-			Log.Println("actions", actions)
 			if e.Key() == key.keyCode {
 				if e.Key() == tcell.KeyRune {
-					Log.Println("Is Rune", key.r)
 					if e.Rune() != key.r {
 						continue
 					}
@@ -354,7 +335,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 
 	if relocate {
-		Log.Println("Relocate from HandleEvent")
 		v.Relocate()
 		v.Relocate()
 	}

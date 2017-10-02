@@ -2,7 +2,6 @@ package main
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/zyedidia/tcell"
 )
@@ -12,7 +11,7 @@ var (
 	lastSearch string
 
 	// Where should we start the search down from (or up from)
-	searchStart Loc
+	searchStart int
 
 	// Is there currently a search in progress
 	searching bool
@@ -51,7 +50,6 @@ func ExitSearch(v *View) {
 	messenger.hasPrompt = false
 	messenger.Clear()
 	messenger.Reset()
-	// v.Cursor.ResetSelection()
 }
 
 // HandleSearchEvent takes an event and a view and will do a real time match from the messenger's output
@@ -92,47 +90,35 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 	return
 }
 
-func searchDown(r *regexp.Regexp, v *View, start, end Loc) bool {
-	for i := start.Y; i <= end.Y; i++ {
+func searchDown(r *regexp.Regexp, v *View, startY, endY int) bool {
+	Log.Println("searchDown", startY, endY)
+	for i := startY; i <= endY; i++ {
 		var l []byte
-		// var charPos int
-		if i == start.Y {
+		if i == startY {
 			runes := []rune(string(v.Buf.lines[i].data))
-			l = []byte(string(runes[start.X:]))
-			// charPos = start.X
-
-			if strings.Contains(r.String(), "^") && start.X != 0 {
-				continue
-			}
+			l = []byte(string(runes[0:]))
 		} else {
 			l = v.Buf.lines[i].data
 		}
 
 		match := r.FindIndex(l)
+		Log.Println("Match?", match)
 
 		if match != nil {
-			// v.Cursor.SetSelectionStart(Loc{charPos + runePos(match[0], string(l)), i})
-			// v.Cursor.SetSelectionEnd(Loc{charPos + runePos(match[1], string(l)), i})
-			// v.Cursor.OrigSelection[0] = v.Cursor.CurSelection[0]
-			// v.Cursor.OrigSelection[1] = v.Cursor.CurSelection[1]
-			// v.Cursor.Loc = v.Cursor.CurSelection[1]
-
+			Log.Println("Line", i)
+			v.Line = i
 			return true
 		}
 	}
 	return false
 }
 
-func searchUp(r *regexp.Regexp, v *View, start, end Loc) bool {
-	for i := start.Y; i >= end.Y; i-- {
+func searchUp(r *regexp.Regexp, v *View, startY, endY int) bool {
+	for i := startY; i >= endY; i-- {
 		var l []byte
-		if i == start.Y {
+		if i == startY {
 			runes := []rune(string(v.Buf.lines[i].data))
-			l = []byte(string(runes[:start.X]))
-
-			if strings.Contains(r.String(), "$") && start.X != Count(string(l)) {
-				continue
-			}
+			l = []byte(string(runes[:0]))
 		} else {
 			l = v.Buf.lines[i].data
 		}
@@ -140,12 +126,7 @@ func searchUp(r *regexp.Regexp, v *View, start, end Loc) bool {
 		match := r.FindIndex(l)
 
 		if match != nil {
-			// v.Cursor.SetSelectionStart(Loc{runePos(match[0], string(l)), i})
-			// v.Cursor.SetSelectionEnd(Loc{runePos(match[1], string(l)), i})
-			// v.Cursor.OrigSelection[0] = v.Cursor.CurSelection[0]
-			// v.Cursor.OrigSelection[1] = v.Cursor.CurSelection[1]
-			// v.Cursor.Loc = v.Cursor.CurSelection[1]
-
+			v.Line = i
 			return true
 		}
 	}
@@ -181,7 +162,5 @@ func Search(searchStr string, v *View, down bool) {
 	}
 	if found {
 		lastSearch = searchStr
-	} else {
-		// v.Cursor.ResetSelection()
 	}
 }

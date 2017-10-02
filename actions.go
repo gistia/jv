@@ -13,16 +13,12 @@ func (v *View) Quit() bool {
 
 // UpN moves the cursor up by amount
 func (v *View) UpN(amount int) bool {
-	Log.Println("UpN - Up by", amount)
 	proposedY := v.Line - amount
-	Log.Println("UpN - Proposed", proposedY)
-	Log.Println("UpN - NumLines", v.Buf.NumLines)
 	if proposedY < 0 {
 		proposedY = 0
 	} else if proposedY >= v.Buf.NumLines-1 {
 		proposedY = v.Buf.NumLines - 1
 	}
-	Log.Println("UpN - Actual", proposedY)
 
 	v.Line = proposedY
 	return true
@@ -58,5 +54,22 @@ func (v *View) PageDown() bool {
 func (v *View) Find() bool {
 	searchStr := ""
 	BeginSearch(searchStr)
+	return true
+}
+
+// FindNext searches forwards for the last used search term
+func (v *View) FindNext() bool {
+	searchStart = v.Line + 1
+	if lastSearch == "" {
+		return true
+	}
+	Search(lastSearch, v, true)
+	return true
+}
+
+// FindPrevious searches backwards for the last used search term
+func (v *View) FindPrevious() bool {
+	searchStart = v.Line
+	Search(lastSearch, v, false)
 	return true
 }

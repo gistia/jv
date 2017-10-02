@@ -5,7 +5,6 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
-	"unicode/utf8"
 )
 
 var (
@@ -89,13 +88,13 @@ func (b *Buffer) Update() {
 }
 
 // Start returns the location of the first character in the buffer
-func (b *Buffer) Start() Loc {
-	return Loc{0, 0}
+func (b *Buffer) Start() int {
+	return 0
 }
 
 // End returns the location of the last character in the buffer
-func (b *Buffer) End() Loc {
-	return Loc{utf8.RuneCount(b.lines[b.NumLines-1].data), b.NumLines - 1}
+func (b *Buffer) End() int {
+	return b.NumLines - 1
 }
 
 // RuneAt returns the rune at a given location in the buffer
