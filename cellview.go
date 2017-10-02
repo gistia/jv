@@ -65,23 +65,21 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	viewLine := 0
 	lineN := top
 
-	curStyle := defStyle
+	// curStyle := defStyle
 	for viewLine < height {
 		if lineN >= len(buf.lines) {
 			break
 		}
 
-		lineStr := buf.Line(lineN)
+		lineObj := buf.Line(lineN)
+		lineStr := lineObj.String()
 		line := []rune(lineStr)
 
-		colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, 0)
+		colN, startOffset, _ := visualToCharPos(left, lineN, lineStr, buf, 0)
 		if colN < 0 {
 			colN = len(line)
 		}
 		viewCol := -startOffset
-		if startStyle != nil {
-			curStyle = *startStyle
-		}
 
 		// We'll either draw the length of the line, or the width of the screen
 		// whichever is smaller
@@ -92,10 +90,15 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if colN >= len(line) {
 				break
 			}
-			// TODO colorize
-			// if group, ok := buf.Match(lineN)[colN]; ok {
-			// 	curStyle = GetColor(group.String())
-			// }
+
+			curStyle := defStyle
+			if viewCol > 26 && viewCol < 33 {
+				if lineObj.entry.level == "info" {
+					curStyle = StringToStyle("yellow")
+				} else if lineObj.entry.level == "error" {
+					curStyle = StringToStyle("red")
+				}
+			}
 
 			char := line[colN]
 

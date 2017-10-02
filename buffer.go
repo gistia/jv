@@ -99,20 +99,20 @@ func (b *Buffer) End() Loc {
 }
 
 // RuneAt returns the rune at a given location in the buffer
-func (b *Buffer) RuneAt(loc Loc) rune {
-	line := []rune(b.Line(loc.Y))
-	if len(line) > 0 {
-		return line[loc.X]
-	}
-	return '\n'
-}
+// func (b *Buffer) RuneAt(loc Loc) rune {
+// 	line := []rune(b.Line(loc.Y))
+// 	if len(line) > 0 {
+// 		return line[loc.X]
+// 	}
+// 	return '\n'
+// }
 
 // Line returns a single line
-func (b *Buffer) Line(n int) string {
+func (b *Buffer) Line(n int) Line {
 	if n >= len(b.lines) {
-		return ""
+		return NewLine([]byte(""))
 	}
-	return b.lines[n].String()
+	return b.lines[n]
 }
 
 // LinesNum returns the number of lines

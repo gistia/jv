@@ -182,6 +182,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.Line = buf.Y
 	v.Topline = 0
 	v.leftCol = 0
+	Log.Println("Relocate from OpenBuffer")
 	v.Relocate()
 	v.messages = make(map[string][]GutterMessage)
 
@@ -224,6 +225,7 @@ func (v *View) ReOpen() {
 	if v.CanClose() {
 		screen.Clear()
 		// v.Buf.ReOpen()
+		Log.Println("Relocate from ReOpen")
 		v.Relocate()
 	}
 }
@@ -257,59 +259,35 @@ func (v *View) VSplitIndex(buf *Buffer, splitIndex int) {
 }
 
 func (v *View) Bottomline() int {
-	// if !v.Buf.Settings["softwrap"].(bool) {
-	// 	return v.Topline + v.Height
-	// }
-
-	screenX, screenY := 0, 0
-	numLines := 0
-	for lineN := v.Topline; lineN < v.Topline+v.Height; lineN++ {
-		line := v.Buf.Line(lineN)
-
-		colN := 0
-		for _, ch := range line {
-			if screenX >= v.Width-v.lineNumOffset {
-				screenX = 0
-				screenY++
-			}
-
-			if ch == '\t' {
-				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
-			}
-
-			screenX++
-			colN++
-		}
-		screenX = 0
-		screenY++
-		numLines++
-
-		if screenY >= v.Height {
-			break
-		}
-	}
-	return numLines + v.Topline
+	return v.Topline + v.Height
 }
 
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	height := v.Bottomline() - v.Topline
-	Log.Println("height", height)
+	Log.Println("Relocate - height", height)
 	ret := false
 	cy := v.Line
-	scrollmargin := 0
+	scrollmargin := 3
+	Log.Println("cy", cy)
+	Log.Println("v.Topline", v.Topline)
+	Log.Println("v.Topline+scrollmargin", v.Topline+scrollmargin)
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
+		Log.Println("realc topline")
 		v.Topline = cy - scrollmargin
 		ret = true
 	} else if cy < v.Topline {
+		Log.Println("topline y")
 		v.Topline = cy
 		ret = true
 	}
 	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
+		Log.Println("recalc topline 2")
 		v.Topline = cy - height + 1 + scrollmargin
 		ret = true
 	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
+		Log.Println("set topline 2")
 		v.Topline = v.Buf.NumLines - height
 		ret = true
 	}
@@ -342,6 +320,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	}
 
+	Log.Println("Relocate from HandleEvent")
 	v.Relocate()
 }
 
@@ -387,6 +366,7 @@ func (v *View) DisplayView() {
 
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
+		Log.Println("Relocate from vtLog")
 		v.Relocate()
 	}
 
@@ -405,11 +385,12 @@ func (v *View) DisplayView() {
 
 	displayLineNumber := true
 	lineNumberPadding := 1
-	realLineN := top
+	realLineN := top - 1
 	visualLineN := 0
 	var line []*Char
 	for visualLineN, line = range v.cellview.lines {
 		screenX := 0
+		realLineN++
 		if displayLineNumber {
 			lineNumStyle := defStyle
 			lineNum := strconv.Itoa(realLineN + 1)
@@ -440,7 +421,13 @@ func (v *View) DisplayView() {
 			lineStyle = defStyle.Reverse(true)
 		}
 		for _, ch := range line {
-			charStyle := lineStyle
+			// charStyle := lineStyle
+			// if ch.style != nil {
+			// }
+			charStyle := ch.style
+			if v.Line == visualLineN {
+				charStyle = defStyle.Reverse(true)
+			}
 			screen.SetContent(screenX, visualLineN, ch.drawChar, nil, charStyle)
 			screenX++
 		}
@@ -448,7 +435,6 @@ func (v *View) DisplayView() {
 			screen.SetContent(screenX, visualLineN, ' ', nil, lineStyle)
 			screenX++
 		}
-		realLineN++
 	}
 }
 

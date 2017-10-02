@@ -13,26 +13,28 @@ func (v *View) Quit(usePlugin bool) bool {
 
 // UpN moves the cursor up by amount
 func (v *View) UpN(amount int) {
-	Log.Println("Up by", amount)
-	proposedY := v.Line + amount
-	Log.Println("Proposed", proposedY)
+	Log.Println("UpN - Up by", amount)
+	proposedY := v.Line - amount
+	Log.Println("UpN - Proposed", proposedY)
+	Log.Println("UpN - NumLines", v.Buf.NumLines)
 	if proposedY < 0 {
 		proposedY = 0
 	} else if proposedY >= v.Buf.NumLines {
-		proposedY = v.Buf.NumLines - 1
+		proposedY = v.Buf.NumLines
 	}
+	Log.Println("UpN - Actual", proposedY)
 
 	v.Line = proposedY
 }
 
 // Down moves the cursor one line down
 func (v *View) Down() {
-	v.UpN(1)
+	v.UpN(-1)
 }
 
 // Up moves the cursor one line down
 func (v *View) Up() {
-	v.UpN(-1)
+	v.UpN(1)
 }
 
 // PageDown scrolls the view down a page
