@@ -91,7 +91,6 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 }
 
 func searchDown(r *regexp.Regexp, v *View, startY, endY int) bool {
-	Log.Println("searchDown", startY, endY)
 	for i := startY; i <= endY; i++ {
 		var l []byte
 		if i == startY {
@@ -102,10 +101,8 @@ func searchDown(r *regexp.Regexp, v *View, startY, endY int) bool {
 		}
 
 		match := r.FindIndex(l)
-		Log.Println("Match?", match)
 
 		if match != nil {
-			Log.Println("Line", i)
 			v.Line = i
 			return true
 		}
