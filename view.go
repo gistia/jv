@@ -303,27 +303,33 @@ func (v *View) SetLine(y int) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	relocate := true
+
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		Log.Println("key", e.Key())
 		if e.Key() == 256 || e.Key() == tcell.KeyCtrlC {
-			Quit([]string{""})
+			relocate = Quit([]string{""})
 		}
 		if e.Key() == tcell.KeyDown {
-			v.Down()
+			relocate = v.Down()
 		}
 		if e.Key() == tcell.KeyUp {
-			v.Up()
+			relocate = v.Up()
 		}
 		if e.Key() == tcell.KeyPgDn {
-			Log.Println("PageDown")
-			v.PageDown()
+			relocate = v.PageDown()
+		}
+		if e.Key() == tcell.KeyPgUp {
+			relocate = v.PageUp()
 		}
 	}
 
-	Log.Println("Relocate from HandleEvent")
-	v.Relocate()
-	v.Relocate()
+	if relocate {
+		Log.Println("Relocate from HandleEvent")
+		v.Relocate()
+		v.Relocate()
+	}
 }
 
 // GutterMessage creates a message in this view's gutter
