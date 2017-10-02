@@ -14,11 +14,14 @@ var bindingActions = map[string]func(*View) bool{
 	"Down":         (*View).Down,
 	"PageUp":       (*View).PageUp,
 	"PageDown":     (*View).PageDown,
+	"Start":        (*View).Start,
+	"End":          (*View).End,
 	"Quit":         (*View).Quit,
 	"Find":         (*View).Find,
 	"FindNext":     (*View).FindNext,
 	"FindPrevious": (*View).FindPrevious,
 	"ClearStatus":  (*View).ClearStatus,
+	"JumpLine":     (*View).JumpLine,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -310,13 +313,19 @@ func DefaultBindings() map[string]string {
 		"Down":     "Down",
 		"PageUp":   "PageUp",
 		"PageDown": "PageDown",
-		"CtrlQ":    "Quit",
-		"CtrlC":    "Quit",
-		"Q":        "Quit",
-		"q":        "Quit",
-		"/":        "Find",
-		"n":        "FindNext",
-		"N":        "FindPrevious",
-		"Escape":   "ClearStatus",
+		"Home":     "Start",
+		"End":      "End",
+		"g":        "JumpLine",
+
+		"CtrlQ": "Quit",
+		"CtrlC": "Quit",
+		"Q":     "Quit",
+		"q":     "Quit",
+
+		"/": "Find",
+		"n": "FindNext",
+		"N": "FindPrevious",
+
+		"Escape": "ClearStatus",
 	}
 }
