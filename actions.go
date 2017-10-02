@@ -53,3 +53,10 @@ func (v *View) PageUp() bool {
 func (v *View) PageDown() bool {
 	return v.DownN(v.Height)
 }
+
+// Find opens a prompt and searches forward for the input
+func (v *View) Find() bool {
+	searchStr := ""
+	BeginSearch(searchStr)
+	return true
+}

@@ -15,6 +15,7 @@ var bindingActions = map[string]func(*View) bool{
 	"PageUp":   (*View).PageUp,
 	"PageDown": (*View).PageDown,
 	"Quit":     (*View).Quit,
+	"Find":     (*View).Find,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -310,7 +311,9 @@ func DefaultBindings() map[string]string {
 		"PageUp":   "PageUp",
 		"PageDown": "PageDown",
 		"CtrlQ":    "Quit",
+		"CtrlC":    "Quit",
 		"Q":        "Quit",
 		"q":        "Quit",
+		"/":        "Find",
 	}
 }

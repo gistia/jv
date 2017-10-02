@@ -159,10 +159,10 @@ func Search(searchStr string, v *View, down bool) {
 	if searchStr == "" {
 		return
 	}
-	r, err := regexp.Compile(searchStr)
-	if v.Buf.Settings["ignorecase"].(bool) {
-		r, err = regexp.Compile("(?i)" + searchStr)
-	}
+	// r, err := regexp.Compile(searchStr)
+	// if v.Buf.Settings["ignorecase"].(bool) {
+	r, err := regexp.Compile("(?i)" + searchStr)
+	// }
 	if err != nil {
 		return
 	}
