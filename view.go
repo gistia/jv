@@ -285,6 +285,7 @@ func (v *View) Relocate() bool {
 	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
 		Log.Println("recalc topline 2")
 		v.Topline = cy - height + 1 + scrollmargin
+		Log.Println("recalc new Topline", v.Topline)
 		ret = true
 	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
 		Log.Println("set topline 2")
@@ -321,6 +322,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 
 	Log.Println("Relocate from HandleEvent")
+	v.Relocate()
 	v.Relocate()
 }
 
@@ -425,7 +427,7 @@ func (v *View) DisplayView() {
 			// if ch.style != nil {
 			// }
 			charStyle := ch.style
-			if v.Line == visualLineN {
+			if v.Line == realLineN {
 				charStyle = defStyle.Reverse(true)
 			}
 			screen.SetContent(screenX, visualLineN, ch.drawChar, nil, charStyle)
